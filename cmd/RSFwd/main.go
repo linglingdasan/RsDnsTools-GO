@@ -61,7 +61,7 @@ func main() {
 
 }
 
-
+//当请求进入时，需要判断转发到哪个fwd上（根据源IP和查询域名），需要确认ecs信息的添加方式（根据源ip所属区域）
 func dnsFwd(w dns.ResponseWriter, req *dns.Msg) {
 
 }
