@@ -31,13 +31,15 @@ func main() {
 	//s := reverseString("www.sina.com")
 	//fmt.Println(s)
 	dnamelist := util.NewDnameList()
-	dnamelist.Insert("sina.com")
-	dnamelist.Insert("163.com")
-	dnamelist.Insert("www.sina.com")
+	dnamelist.Insert("sina.com", 1)
+	dnamelist.Insert("163.com", 1)
+	dnamelist.Insert("www.sina.com", 2)
 
-	testnames := []string{"sports.sina.com", "ea.com", "www.taobao.com"}
+	testnames := []string{"sports.sina.com", "ea.com", "www.taobao.com", "sports.www.sina.com"}
 	for _, testname := range testnames{
-		fmt.Printf("test name %s match result is %v\r\n", testname, dnamelist.Match(testname))
+		fmt.Printf("test name %s match result is %v, groupid is %d \r\n", testname,
+			dnamelist.Match(testname), dnamelist.GetId(testname))
+
 	}
 
 

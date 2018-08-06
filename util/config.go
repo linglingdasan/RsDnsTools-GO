@@ -21,7 +21,26 @@ type cdn_ips struct {
 }
 
 type Config struct{
-	ServiceAddress	string
+	ServiceAddress	string `json:"ServerAddress"`
+	IpConfigFile	string	`json:"IpConfigFile"`
+	DomainConfigFile	string	`json:DomainConfigFile`
+	FwdConfigFile	string	`json:FwdConfigFile`
+	EcsMapConfigFile	string	`json:EcsMapConfigFile`
+
+	//acl name ==> acl id
+	AclNameIdMap	map[string]int
+	//acl id ==> acl name
+	AclIdNameMap	map[int]string
+	//domain list name ==> domain list id
+	DLNameIdMap		map[string]int
+	//domain list id ==> domain list name
+	DLIdNameMap		map[int]string
+	//acl id ==> ecs ip
+	AclEcsMap	map[int]string
+
+	AclMap		*dns_cidr
+	DnameList	*dnamelist
+
 }
 
 type Fwder struct{
@@ -40,8 +59,52 @@ type ForwarderArray struct{
 func NewConfig(configFile string) *Config{
 	config := parseConfigJson(configFile)
 
+	//acl部分
+	ips := ParseConfigMapStringSlice(config.IpConfigFile)
+	id :=0
+
+	config.AclMap = NewDnsCidr()
+	config.AclNameIdMap = make(map[string]int)
+	config.AclIdNameMap = make(map[int]string)
+
+	for name, cidrs := range ips{
+		println("view name is ", name)
+		config.AclNameIdMap[name] = id
+		config.AclIdNameMap[id] = name
+
+		for _, cidr := range cidrs{
+			println(cidr)
+			config.AclMap.Insert(cidr, id)
+		}
+		id++
+	}
+
+	//domain name部分
+
+	dnmap := ParseConfigMapStringSlice(config.DomainConfigFile)
+	id = 0
+
+	config.DnameList = NewDnameList()
+	config.DLNameIdMap = make(map[string]int)
+	config.DLIdNameMap = make(map[int]string)
+
+	for name, dn := range dnmap{
+		println("domain names is ", name)
+		config.DLNameIdMap[name] = id
+		config.DLIdNameMap[id] = name
+		for _, names := range dn{
+			println(names)
+			config.DnameList.Insert(name, id)
+		}
+		id++
+	}
+
+
+
 	return config
 }
+
+
 
 func parseConfigJson(path string) *Config {
 
@@ -68,6 +131,8 @@ func parseConfigJson(path string) *Config {
 	return j
 }
 
+
+//读取dns forward配置文件，得到原始fwd列表
 func ParseFwdArray(path string) *ForwarderArray{
 	f, err := os.Open(path)
 	if err != nil {
@@ -91,10 +156,17 @@ func ParseFwdArray(path string) *ForwarderArray{
 
 	return fa
 }
-
+//从一个名值对中获取配置, 保存为map
+//形如：(设置ecs ip)
+//{
+//  "beijing_acl" : "8.8.8.8",
+//  "tianjin_acl" : "114.114.114.114"
+//}
+//
 func ParseConfigMapString(configfile string) map[string]string{
 	f, err := os.Open(configfile)
 	if err != nil {
+		fmt.Printf("File not found: %s\n", configfile)
 		os.Exit(1)
 	}
 	defer f.Close()
@@ -113,10 +185,18 @@ func ParseConfigMapString(configfile string) map[string]string{
 	return result
 }
 
-
+//从一个名称对应多值得配置文件中获取配置，保存为map，键值为string，值为string slice
+//配置形如：
+//{
+//  "beijing_acl" : ["1.4.4.0/24", "1.2.2.0/24",
+//    "123.112.0.0/12", "192.168.1.1/32"],
+//  "tianjin_acl" : ["103.1.20.0/22", "192.168.2.1/32"]
+//}
+//
 func ParseConfigMapStringSlice(configfile string) map[string][]string{
 	f, err := os.Open(configfile)
 	if err != nil {
+		fmt.Printf("File not found: %s\n", configfile)
 		os.Exit(1)
 	}
 	defer f.Close()

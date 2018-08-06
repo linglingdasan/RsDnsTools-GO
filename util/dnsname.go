@@ -13,8 +13,8 @@ func NewDnameList() *dnamelist{
 	return dnl
 }
 
-func (dnl *dnamelist)Insert(namestr string){
-	dnl.dnametree, _, _ = dnl.dnametree.Insert([]byte(reverseString(namestr)), true)
+func (dnl *dnamelist)Insert(namestr string, groupid int){
+	dnl.dnametree, _, _ = dnl.dnametree.Insert([]byte(reverseString(namestr)), groupid)
 }
 
 func (dnl *dnamelist)Match(namestr string)bool{
@@ -22,6 +22,18 @@ func (dnl *dnamelist)Match(namestr string)bool{
 	return result
 }
 
+func (dnl *dnamelist)GetId(namestr string)int{
+	_, val, _ := dnl.dnametree.Root().LongestPrefix([]byte(reverseString(namestr)))
+
+	var groupid int
+	if val != nil{
+		groupid = val.(int)
+	}else {
+		groupid = -1
+	}
+
+	return groupid
+}
 
 func reverseString(s string) string {
 	runes := []rune(s)

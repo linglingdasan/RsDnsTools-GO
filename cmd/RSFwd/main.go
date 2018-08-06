@@ -10,6 +10,7 @@ import (
 	"os/signal"
 	"syscall"
 	"fmt"
+	"RsDnsTools/util"
 )
 
 // For auto version building
@@ -23,6 +24,7 @@ func main() {
 		logPath         string
 		isLogVerbose    bool
 		processorNumber int
+
 	)
 
 	flag.StringVar(&configPath, "c", "./config.json", "config file path")
@@ -31,6 +33,9 @@ func main() {
 	flag.IntVar(&processorNumber, "p", runtime.NumCPU(), "number of processor to use")
 
 	flag.Parse()
+
+	config := util.NewConfig(configPath)
+	fmt.Printf("%v\n", config)
 
 	if isLogVerbose {
 		log.SetLevel(log.DebugLevel)
@@ -50,6 +55,8 @@ func main() {
 	log.Info("RSFwd " + version)
 
 	runtime.GOMAXPROCS(processorNumber)
+
+
 
 	server, _ := NewServer("0.0.0.0:5553")
 	server.Run()
