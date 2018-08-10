@@ -2,7 +2,8 @@ package util
 
 import (
 	"encoding/json"
-	"log"
+	log "github.com/Sirupsen/logrus"
+	"gopkg.in/fatih/pool.v2"
 	"os"
 	"io/ioutil"
 	"fmt"
@@ -40,6 +41,7 @@ type Config struct{
 
 	AclMap		*dns_cidr
 	DnameList	*dnamelist
+	Forwarders  *ForwarderArray
 
 }
 
@@ -51,9 +53,19 @@ type Fwder struct{
 	Acl 	[]string
 	Domains	[]string
 
+	FwdPool pool.Pool
+
 }
+
+type HitPoint struct{
+	AclId	int
+	NameId	int
+}
+
 type ForwarderArray struct{
-	Forwarder	[]*Fwder
+	Forwarder	[]*Fwder `json:Forwarder`
+	FwdMap		map[HitPoint]*Fwder
+
 }
 
 func NewConfig(configFile string) *Config{
@@ -68,12 +80,12 @@ func NewConfig(configFile string) *Config{
 	config.AclIdNameMap = make(map[int]string)
 
 	for name, cidrs := range ips{
-		println("view name is ", name)
+		log.Println("view name is ", name)
 		config.AclNameIdMap[name] = id
 		config.AclIdNameMap[id] = name
 
 		for _, cidr := range cidrs{
-			println(cidr)
+			log.Println(cidr)
 			config.AclMap.Insert(cidr, id)
 		}
 		id++
@@ -88,18 +100,55 @@ func NewConfig(configFile string) *Config{
 	config.DLNameIdMap = make(map[string]int)
 	config.DLIdNameMap = make(map[int]string)
 
-	for name, dn := range dnmap{
-		println("domain names is ", name)
-		config.DLNameIdMap[name] = id
-		config.DLIdNameMap[id] = name
-		for _, names := range dn{
-			println(names)
-			config.DnameList.Insert(name, id)
+	for dgname, dn := range dnmap{
+		log.Println("domain group name is ", dgname)
+		config.DLNameIdMap[dgname] = id
+		config.DLIdNameMap[id] = dgname
+		for _, dname := range dn{
+			if !(dname[len(dname)-1:] == ".") {
+				dname += "."
+			}
+			log.Println(dname)
+
+			config.DnameList.Insert(dname, id)
 		}
 		id++
 	}
 
+	//ecs部分
+	ecs := ParseConfigMapString(config.EcsMapConfigFile)
 
+	config.AclEcsMap = make(map[int]string)
+
+	for aclname, aclip := range ecs{
+		log.Printf("aclname is: %s, ecs ip is: %s\n", aclname, aclip)
+		config.AclEcsMap[config.AclNameIdMap[aclname]] = aclip
+	}
+
+	//fwd部分
+	tfa := ParseFwdArray(config.FwdConfigFile)
+//	for _, fa := range tfa.Forwarder{
+//		fmt.Printf("%+v\n", fa)
+//	}
+	tfa.FwdMap = make(map[HitPoint]*Fwder)
+	for i:=0; i<len(tfa.Forwarder);i++{
+		log.Printf("%+v\n", tfa.Forwarder[i])
+		for _, aclname :=  range tfa.Forwarder[i].Acl{
+			aclid, ok := config.AclNameIdMap[aclname]
+			if !ok{
+				log.Fatal("Fwd config has a missing Acl: ", aclname)
+			}
+			for _, dname := range tfa.Forwarder[i].Domains{
+				dnameid, ok := config.DLNameIdMap[dname]
+				if !ok{
+					log.Fatal("Fwd config has a missing dname: ", dname)
+				}
+				tfa.FwdMap[HitPoint{aclid, dnameid}] = tfa.Forwarder[i]
+
+			}
+		}
+	}
+	config.Forwarders = tfa
 
 	return config
 }
@@ -111,21 +160,18 @@ func parseConfigJson(path string) *Config {
 	f, err := os.Open(path)
 	if err != nil {
 		log.Fatal("Open config file failed: ", err)
-		os.Exit(1)
 	}
 	defer f.Close()
 
 	b, err := ioutil.ReadAll(f)
 	if err != nil {
 		log.Fatal("Read config file failed: ", err)
-		os.Exit(1)
 	}
 
 	j := new(Config)
 	err = json.Unmarshal(b, j)
 	if err != nil {
 		log.Fatal("Json syntex error: ", err)
-		os.Exit(1)
 	}
 
 	return j
@@ -137,21 +183,18 @@ func ParseFwdArray(path string) *ForwarderArray{
 	f, err := os.Open(path)
 	if err != nil {
 		log.Fatal("Open config file failed: ", err)
-		os.Exit(1)
 	}
 	defer f.Close()
 
 	b, err := ioutil.ReadAll(f)
 	if err != nil {
 		log.Fatal("Read config file failed: ", err)
-		os.Exit(1)
 	}
 
 	fa := new(ForwarderArray)
 	err = json.Unmarshal(b, fa)
 	if err != nil{
 		log.Fatal("Json syntex error: ", err)
-		os.Exit(1)
 	}
 
 	return fa
@@ -166,20 +209,19 @@ func ParseFwdArray(path string) *ForwarderArray{
 func ParseConfigMapString(configfile string) map[string]string{
 	f, err := os.Open(configfile)
 	if err != nil {
-		fmt.Printf("File not found: %s\n", configfile)
-		os.Exit(1)
+		log.Fatalf("File not found: %s\n", configfile)
 	}
 	defer f.Close()
 
 	b, err := ioutil.ReadAll(f)
 	if err != nil{
-		os.Exit(1)
+		log.Fatal("Read File failed: ", err)
 	}
 
 	var result map[string]string
 
 	if err := json.Unmarshal(b, &result); err != nil {
-		fmt.Println("json file format error")
+		log.Fatal("json file format error", err)
 	}
 
 	return result
@@ -196,19 +238,18 @@ func ParseConfigMapString(configfile string) map[string]string{
 func ParseConfigMapStringSlice(configfile string) map[string][]string{
 	f, err := os.Open(configfile)
 	if err != nil {
-		fmt.Printf("File not found: %s\n", configfile)
-		os.Exit(1)
+		log.Fatalf("File not found: %s\n", configfile)
 	}
 	defer f.Close()
 
 	b, err := ioutil.ReadAll(f)
 	if err != nil{
-		os.Exit(1)
+		log.Fatal("Read File Failed: ", err)
 	}
 
 	var result map[string]interface{}
 	if err := json.Unmarshal(b, &result); err != nil {
-		fmt.Println("json file format error")
+		log.Fatal("json file format error", err)
 	}
 
 	ret := make(map[string][]string)

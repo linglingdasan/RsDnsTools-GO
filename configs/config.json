@@ -2,6 +2,6 @@
   "ServerAddress": "0.0.0.0:53",
   "IpConfigFile": "configs/cdn.ips.json",
   "DomainConfigFile": "configs/cdn.names.json",
-  "FwdConfigFile": "configs/ecs.map.json",
-  "EcsMapConfigFile": "configs/fwd.json"
+  "EcsMapConfigFile": "configs/ecs.map.json",
+  "FwdConfigFile": "configs/fwd.json"
 }

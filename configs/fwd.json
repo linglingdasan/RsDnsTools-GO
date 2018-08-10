@@ -6,14 +6,14 @@
       "Timeout": 5,
       "ECS": "enable",
       "Acl":["beijing_acl", "tianjin_acl"],
-      "Domains":["cdn_names"]
+      "Domains":["cdn_names", "ecs_names"]
     },
     {
       "Name": "test dns ipv4",
       "Address": "123.124.198.61:53",
       "Timeout": 5,
       "ACL":["test_acl"],
-      "Domains":["test_names"]
+      "Domains":["test_names", "ecs_names"]
     }
   ]
 }

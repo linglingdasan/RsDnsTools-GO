@@ -65,9 +65,15 @@
   ]
   revision = "c4afb3effaa53fd9a06ca61262dc7ce8df4c081b"
 
+[[projects]]
+  name = "gopkg.in/fatih/pool.v2"
+  packages = ["."]
+  revision = "010e0b745d12eaf8426c95f9c3924d81dd0b668f"
+  version = "v2.0.0"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "3110d1f74be3d2c4b1265e85daa84050be099aa445b31f9221e4eea10a42f373"
+  inputs-digest = "a40f920e993755640c892f4f9353ce14db16f6b64b0ba24a0146f3f0719bfc2d"
   solver-name = "gps-cdcl"
   solver-version = 1
