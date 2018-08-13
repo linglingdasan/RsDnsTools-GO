@@ -46,12 +46,13 @@ type Config struct{
 }
 
 type Fwder struct{
-	Name 	string
-	Address	string
+	Name 	string	`json:Name`
+	Address	string	`json:Address`
 	Timeout	int
-	Ecs 	string
+	Ecs 	bool
 	Acl 	[]string
 	Domains	[]string
+	Default bool	`json:Default`
 
 	FwdPool pool.Pool
 
@@ -80,12 +81,12 @@ func NewConfig(configFile string) *Config{
 	config.AclIdNameMap = make(map[int]string)
 
 	for name, cidrs := range ips{
-		log.Println("view name is ", name)
+		log.Info("view name is ", name)
 		config.AclNameIdMap[name] = id
 		config.AclIdNameMap[id] = name
 
 		for _, cidr := range cidrs{
-			log.Println(cidr)
+			log.Info(cidr)
 			config.AclMap.Insert(cidr, id)
 		}
 		id++
@@ -101,14 +102,14 @@ func NewConfig(configFile string) *Config{
 	config.DLIdNameMap = make(map[int]string)
 
 	for dgname, dn := range dnmap{
-		log.Println("domain group name is ", dgname)
+		log.Info("domain group name is ", dgname)
 		config.DLNameIdMap[dgname] = id
 		config.DLIdNameMap[id] = dgname
 		for _, dname := range dn{
 			if !(dname[len(dname)-1:] == ".") {
 				dname += "."
 			}
-			log.Println(dname)
+			log.Info(dname)
 
 			config.DnameList.Insert(dname, id)
 		}
@@ -121,7 +122,7 @@ func NewConfig(configFile string) *Config{
 	config.AclEcsMap = make(map[int]string)
 
 	for aclname, aclip := range ecs{
-		log.Printf("aclname is: %s, ecs ip is: %s\n", aclname, aclip)
+		log.Infof("aclname is: %s, ecs ip is: %s", aclname, aclip)
 		config.AclEcsMap[config.AclNameIdMap[aclname]] = aclip
 	}
 
@@ -132,7 +133,7 @@ func NewConfig(configFile string) *Config{
 //	}
 	tfa.FwdMap = make(map[HitPoint]*Fwder)
 	for i:=0; i<len(tfa.Forwarder);i++{
-		log.Printf("%+v\n", tfa.Forwarder[i])
+		log.Debugf("%+v\n", tfa.Forwarder[i])
 		for _, aclname :=  range tfa.Forwarder[i].Acl{
 			aclid, ok := config.AclNameIdMap[aclname]
 			if !ok{
