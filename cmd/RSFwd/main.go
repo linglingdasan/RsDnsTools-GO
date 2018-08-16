@@ -14,7 +14,11 @@ import (
 
 // For auto version building
 //  go build -ldflags "-X main.version=version"
-var version string
+var (
+	Version		string
+	BuildTime	string
+)
+
 
 func main() {
 
@@ -25,13 +29,20 @@ func main() {
 		processorNumber int
 
 	)
+	checkVersion := false
 
 	flag.StringVar(&configPath, "c", "./config.json", "config file path")
 	flag.StringVar(&logPath, "l", "", "log file path")
 	flag.BoolVar(&isLogVerbose, "v", false, "verbose mode")
 	flag.IntVar(&processorNumber, "p", runtime.NumCPU(), "number of processor to use")
+	flag.BoolVar(&checkVersion, "V", false, "get version")
 
 	flag.Parse()
+
+	if checkVersion{
+		fmt.Printf("BuildTag is: %s--%s\r\n", Version, BuildTime)
+		return
+	}
 
 	config := util.NewConfig(configPath)
 	fmt.Printf("%v\n", config)
@@ -51,7 +62,7 @@ func main() {
 		}
 	}
 
-	log.Info("RSFwd " + version)
+	log.Info("RSFwd " + Version)
 
 	runtime.GOMAXPROCS(processorNumber)
 
