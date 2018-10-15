@@ -1,5 +1,5 @@
 {
-  "ServerAddress": "0.0.0.0:53",
+  "ServerAddress": ":5552",
   "IpConfigFile": "configs/cdn.ips.json",
   "DomainConfigFile": "configs/cdn.names.json",
   "EcsMapConfigFile": "configs/ecs.map.json",

@@ -68,7 +68,7 @@ func main() {
 
 
 
-	server, _ := NewServer("0.0.0.0:5553", config)
+	server, _ := NewServer(config.ServiceAddress, config)
 	server.Run()
 
 	sig := make(chan os.Signal)
