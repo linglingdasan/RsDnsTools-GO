@@ -2,78 +2,123 @@
 
 
 [[projects]]
+  digest = "1:9e9193aa51197513b3abcb108970d831fbcf40ef96aa845c4f03276e1fa316d2"
   name = "github.com/Sirupsen/logrus"
   packages = ["."]
+  pruneopts = "UT"
   revision = "c155da19408a8799da419ed3eeb0cb5db0ad5dbc"
   version = "v1.0.5"
 
 [[projects]]
+  digest = "1:c9cca93eead274e83f3015bbe29032814f39b5b04f21da2406b2476609f99079"
+  name = "github.com/google/gopacket"
+  packages = [
+    ".",
+    "examples/util",
+    "layers",
+    "pcap",
+    "tcpassembly",
+    "tcpassembly/tcpreader",
+  ]
+  pruneopts = "UT"
+  revision = "a6b099ece4680a8bdea84fa78166d0712108a95c"
+  version = "v1.1.15"
+
+[[projects]]
   branch = "master"
+  digest = "1:2394f5a25132b3868eff44599cc28d44bdd0330806e34c495d754dd052df612b"
   name = "github.com/hashicorp/go-immutable-radix"
   packages = ["."]
+  pruneopts = "UT"
   revision = "7f3cd4390caab3250a57f30efdb2a65dd7649ecf"
 
 [[projects]]
   branch = "master"
+  digest = "1:e0e3eb7886110c57a7c103fbc5fc419b1651d3014655b47b71f26809c2daeb1c"
   name = "github.com/hashicorp/golang-lru"
   packages = ["simplelru"]
+  pruneopts = "UT"
   revision = "0fb14efe8c47ae851c0034ed7a448854d3d34cf3"
 
 [[projects]]
+  digest = "1:463e4140189f8194f9121ca1c7fe3b8e9e9a2ab3d949b43c835c21034927dc62"
   name = "github.com/miekg/dns"
   packages = ["."]
+  pruneopts = "UT"
   revision = "5a2b9fab83ff0f8bfc99684bd5f43a37abe560f1"
   version = "v1.0.8"
 
 [[projects]]
   branch = "master"
+  digest = "1:cd2cbc2f6693543f47cc53e2b2f9be229f017f6604322d1f0b7306b009059243"
   name = "github.com/yl2chen/cidranger"
   packages = [
     ".",
-    "net"
+    "net",
   ]
+  pruneopts = "UT"
   revision = "928b519e5268fe386d0f7decce320205cc09ca95"
 
 [[projects]]
   branch = "master"
+  digest = "1:583f2f436bab7b59a7bd3e759f1375b06f460760ed1f9235604d143eaab83009"
   name = "golang.org/x/crypto"
   packages = [
     "ed25519",
     "ed25519/internal/edwards25519",
-    "ssh/terminal"
+    "ssh/terminal",
   ]
+  pruneopts = "UT"
   revision = "a49355c7e3f8fe157a85be2f77e6e269a0f89602"
 
 [[projects]]
   branch = "master"
+  digest = "1:16d2da72fbbf6cc87de77d770f4c3d89c20c4fc0f08b4e14f70e2e0e8708b606"
   name = "golang.org/x/net"
   packages = [
     "bpf",
     "internal/iana",
     "internal/socket",
     "ipv4",
-    "ipv6"
+    "ipv6",
   ]
+  pruneopts = "UT"
   revision = "afe8f62b1d6bbd81f31868121a50b06d8188e1f9"
 
 [[projects]]
   branch = "master"
+  digest = "1:c1fee1a2c739c7b220dc3de939f659dce271fa8d9de155cb8cfcfb99c941cbc3"
   name = "golang.org/x/sys"
   packages = [
     "unix",
-    "windows"
+    "windows",
   ]
+  pruneopts = "UT"
   revision = "c4afb3effaa53fd9a06ca61262dc7ce8df4c081b"
 
 [[projects]]
+  digest = "1:546db0bd0542751aff1e75052dd1fa0b0a1cee681d43bfa9ffac7c22714c1070"
   name = "gopkg.in/fatih/pool.v2"
   packages = ["."]
+  pruneopts = "UT"
   revision = "010e0b745d12eaf8426c95f9c3924d81dd0b668f"
   version = "v2.0.0"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "a40f920e993755640c892f4f9353ce14db16f6b64b0ba24a0146f3f0719bfc2d"
+  input-imports = [
+    "github.com/Sirupsen/logrus",
+    "github.com/google/gopacket",
+    "github.com/google/gopacket/examples/util",
+    "github.com/google/gopacket/layers",
+    "github.com/google/gopacket/pcap",
+    "github.com/google/gopacket/tcpassembly",
+    "github.com/google/gopacket/tcpassembly/tcpreader",
+    "github.com/hashicorp/go-immutable-radix",
+    "github.com/miekg/dns",
+    "github.com/yl2chen/cidranger",
+    "gopkg.in/fatih/pool.v2",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1
