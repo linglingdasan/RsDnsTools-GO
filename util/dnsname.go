@@ -1,6 +1,9 @@
 package util
 
-import "github.com/hashicorp/go-immutable-radix"
+import (
+	"errors"
+	"github.com/hashicorp/go-immutable-radix"
+)
 
 
 type dnamelist struct{
@@ -41,4 +44,28 @@ func reverseString(s string) string {
 		runes[from], runes[to] = runes[to], runes[from]
 	}
 	return string(runes)
+}
+
+type dnametree struct{
+	dnametree *iradix.Tree
+}
+func NewDnameTree() *dnametree{
+	dnt := &dnametree{}
+	dnt.dnametree = iradix.New()
+	return dnt
+}
+func (dnt *dnametree)Insert(namestr string, pInterface interface{}){
+	dnt.dnametree, _, _ = dnt.dnametree.Insert([]byte(reverseString(namestr)), pInterface)
+}
+func (dnt *dnametree)Match(namestr string)bool{
+	_, _, result := dnt.dnametree.Root().LongestPrefix([]byte(reverseString(namestr)))
+	return result
+}
+func (dnt *dnametree)GetPInterface(namestr string) (pInterface interface{}, err error){
+	_, val, _ := dnt.dnametree.Root().LongestPrefix([]byte(reverseString(namestr)))
+	if val != nil{
+		return val, nil
+	}else {
+		return val, errors.New("no this dname")
+	}
 }

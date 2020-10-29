@@ -4,10 +4,64 @@
       "Name": "google dns1 ipv4",
       "Address": "8.8.8.8:53",
       "Timeout": 5,
+      "Acl":["beijing_acl"],
+      "Domains":["cdn_names"]
+    },
+    {
+      "Name": "google dns1 ipv4",
+      "Address": "8.8.8.8:53",
+      "Timeout": 5,
+      "Acl":["beijing_acl"],
+      "Domains":["cdn_names", "ecs_names"]
+    },
+    {
+      "Name": "google dns1 ipv4",
+      "Address": "8.8.8.8:53",
+      "Timeout": 5,
+      "Acl":["beijing_acl", "tianjin_acl"],
+      "Domains":["cdn_names"]
+    },
+    {
+      "Name": "google dns1 ipv4",
+      "Address": "8.8.8.8:53",
+      "Timeout": 5,
+      "Acl":["beijing_acl", "tianjin_acl"],
+      "Domains":["cdn_names", "ecs_names"]
+    },
+
+    {
+      "Name": "google dns1 ipv4",
+      "Address": "8.8.8.8:53",
+      "Timeout": 5,
+      "ECS": true,
+      "Acl":["beijing_acl"],
+      "Domains":["cdn_names"]
+    },
+    {
+      "Name": "google dns1 ipv4",
+      "Address": "8.8.8.8:53",
+      "Timeout": 5,
+      "ECS": true,
+      "Acl":["beijing_acl"],
+      "Domains":["cdn_names", "ecs_names"]
+    },
+    {
+      "Name": "google dns1 ipv4",
+      "Address": "8.8.8.8:53",
+      "Timeout": 5,
+      "ECS": true,
+      "Acl":["beijing_acl", "tianjin_acl"],
+      "Domains":["cdn_names"]
+    },
+    {
+      "Name": "google dns1 ipv4",
+      "Address": "8.8.8.8:53",
+      "Timeout": 5,
       "ECS": true,
       "Acl":["beijing_acl", "tianjin_acl"],
       "Domains":["cdn_names", "ecs_names"]
     },
+
     {
       "Name": "test dns ipv4",
       "Address": "123.124.198.61:53",
