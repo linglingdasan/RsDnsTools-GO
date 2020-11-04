@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"time"
 	"github.com/miekg/dns"
 	"sync"
@@ -104,8 +105,11 @@ func (s *Server)Fetch(fwd string, r *dns.Msg)(*dns.Msg){
 }
 
 func (s *Server)FetchResult(c net.Conn, m *dns.Msg) (r *dns.Msg, err error) {
+	defer func(){
+		fmt.Println("err:", err)
+	}()
 	t := time.Now()
-	socketTimeout := 2
+	socketTimeout := 20
 	co := &dns.Conn{Conn:c}
 	co.SetDeadline(t.Add(time.Duration(socketTimeout)*time.Second))
 	if err = co.WriteMsg(m); err != nil {
@@ -167,6 +171,7 @@ func (s *Server) serveDNSIndeedAdaptiveEcs(w dns.ResponseWriter, r *dns.Msg, cli
 			result, err = s.FetchResult(conn, r)
 			if err != nil {
 				if brokenConn, ok := conn.(*pool.PoolConn); ok {
+					log.Errorf("s.FetchResult, %s", err)
 					brokenConn.MarkUnusable()
 					brokenConn.Close()
 				}

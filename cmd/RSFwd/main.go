@@ -2,15 +2,15 @@ package main
 
 import (
 	"RsDnsTools/controller"
+	"RsDnsTools/util"
 	"flag"
-	"runtime"
-	"os"
+	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"io"
+	"os"
 	"os/signal"
+	"runtime"
 	"syscall"
-	"fmt"
-	"RsDnsTools/util"
 )
 
 // For auto version building
@@ -20,15 +20,12 @@ var (
 	BuildTime	string
 )
 
-
 func main() {
-
 	var (
 		configPath      string
 		logPath         string
 		isLogVerbose    bool
 		processorNumber int
-
 	)
 	checkVersion := false
 
@@ -39,15 +36,14 @@ func main() {
 	flag.BoolVar(&checkVersion, "V", false, "get version")
 
 	flag.Parse()
-
 	if checkVersion{
 		fmt.Printf("BuildTag is: %s--%s\r\n", Version, BuildTime)
 		return
 	}
-
 	config := util.NewConfig(configPath)
 	fmt.Printf("%v\n", config)
 
+	checkVersion = true
 	if isLogVerbose {
 		log.SetLevel(log.DebugLevel)
 	} else {
@@ -62,19 +58,12 @@ func main() {
 			log.SetOutput(io.MultiWriter(lf, os.Stdout))
 		}
 	}
-
 	log.Info("RSFwd " + Version)
-
 	runtime.GOMAXPROCS(processorNumber)
-
-
-
 	server, _ := controller.NewServer(config.ServiceAddress, config)
 	server.Run()
-
 	sig := make(chan os.Signal)
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
 	s := <-sig
 	fmt.Printf("Signal (%s) received, stopping\n", s)
-
 }

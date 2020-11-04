@@ -66,6 +66,6 @@ func (dnt *dnametree)GetPInterface(namestr string) (pInterface interface{}, err 
 	if val != nil{
 		return val, nil
 	}else {
-		return val, errors.New("no this dname")
+		return val, errors.New("no this dname!")
 	}
 }

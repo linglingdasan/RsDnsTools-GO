@@ -5,44 +5,44 @@
       "Address": "192.168.3.36:3653",
       "Timeout": 5,
       "Nemask": 24,
-      "ECS": true,
-      "Domains":["cdn_names"]
+      "Ecs": true,
+      "Domains":["haveecs1_names"]
     },
     {
-      "Name": "google dns1 ipv4",
+      "Name": "google dns1 ipv41",
       "Address": "192.168.3.36:3653",
       "Timeout": 5,
-      "Nemask": 24,
-      "ECS": true,
-      "Domains":["cdn_names", "ecs_names"]
+      "Nemask": 27,
+      "Ecs": true,
+      "Domains":["haveecs2_names", "haveecs3_names"]
+    },
+    {
+      "Name": "google dns1 ipv41",
+      "Address": "192.168.3.36:3653",
+      "Timeout": 5,
+      "Nemask": 27,
+      "Ecs": true,
+      "Domains":["haveecs7_names"]
+    },
+    {
+      "Name": "test dns ipv42",
+      "Address": "192.168.3.36:3653",
+      "Timeout": 5,
+      "Domains":["haveecs4_names"]
+    },
+    {
+      "Name": "test dns ipv43",
+      "Address": "192.168.3.36:3653",
+      "Timeout": 5,
+      "Domains":["haveecs5_names", "haveecs6_names"]
     },
 
     {
-      "Name": "test dns ipv4",
-      "Address": "123.124.198.61:53",
+      "Name": "default dns 45",
+      "Address": "192.168.3.11:53",
       "Timeout": 5,
-      "Nemask": 24,
-      "Domains":["ecs_names"]
-    },
-    {
-      "Name": "test dns ipv4",
-      "Address": "123.124.198.61:53",
-      "Timeout": 5,
-      "Nemask": 24,
-      "Domains":["cdn_names", "ecs_names"]
-    },
-
-    {
-      "Name": "default dns1",
-      "Address": "8.8.8.8:53",
-      "Timeout": 5,
-      "Nemask": 24,
-      "ECS": true
-    },
-    {
-      "Name": "default dns",
-      "Address": "8.8.8.8:53",
-      "Timeout": 2,
+      "Nemask": 27,
+      "Ecs": true,
       "Default": true
     }
   ]
