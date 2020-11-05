@@ -1,6 +1,9 @@
 {
-  "ecs_names" : ["www.sina.com", "www.163.com", "www.taobao.com", "www.yahoo.com"],
-  "cdn_names" : ["www.xinhua.com", "www.renmin.com"],
-  "normal_names" : ["www.ea.com", "www.microsoft.com", "www.qq.com"],
-  "test_names": ["www.runstone.com"]
+  "haveecs1_names": ["haveecs1.llg.com", "www.a1.com"],
+  "haveecs2_names": ["haveecs2.llg.com", "www.a2.com"],
+  "haveecs3_names": ["haveecs3.llg.com", "www.a3.com"],
+  "haveecs4_names": ["haveecs4.llg.com", "www.a4.com"],
+  "haveecs5_names": ["haveecs5.llg.com", "www.a5.com"],
+  "haveecs6_names": ["haveecs6.llg.com", "www.a6.com"],
+  "haveecs7_names": ["haveecs7.llg.com", "www.a7.com", "www.111com.net"]
 }

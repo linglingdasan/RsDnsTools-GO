@@ -1,6 +1,7 @@
 package main
 
 import (
+	"RsDnsTools/controller"
 	"flag"
 	"runtime"
 	"os"
@@ -31,7 +32,7 @@ func main() {
 	)
 	checkVersion := false
 
-	flag.StringVar(&configPath, "c", "./config.json", "config file path")
+	flag.StringVar(&configPath, "c", "configs/config.json", "config file path")
 	flag.StringVar(&logPath, "l", "", "log file path")
 	flag.BoolVar(&isLogVerbose, "v", false, "verbose mode")
 	flag.IntVar(&processorNumber, "p", runtime.NumCPU(), "number of processor to use")
@@ -47,6 +48,7 @@ func main() {
 	config := util.NewConfig(configPath)
 	fmt.Printf("%v\n", config)
 
+	checkVersion = true
 	if isLogVerbose {
 		log.SetLevel(log.DebugLevel)
 	} else {
@@ -68,7 +70,7 @@ func main() {
 
 
 
-	server, _ := NewServer(config.ServiceAddress, config)
+	server, _ := controller.NewServer(config.ServiceAddress, config)
 	server.Run()
 
 	sig := make(chan os.Signal)

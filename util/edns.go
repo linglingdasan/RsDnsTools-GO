@@ -1,8 +1,8 @@
 package util
 
 import (
-	"net"
 	"github.com/miekg/dns"
+	"net"
 )
 
 type EDNSClientSubnetType struct {
@@ -35,6 +35,36 @@ func SetEDNSClientSubnet(m *dns.Msg, ip string) {
 		} else {
 			es.Family = 2          // 1 for IPv4 source address, 2 for IPv6
 			es.SourceNetmask = 128 // 32 for IPV4, 128 for IPv6
+		}
+		es.SourceScope = 0
+		o.Option = append(o.Option, es)
+	}
+}
+func SetEDNSClientSubnet2(m *dns.Msg, ip string, lenNetmask uint8) {
+	if ip == "" {
+		return
+	}
+	o := m.IsEdns0()
+	if o == nil {
+		o = new(dns.OPT)
+		o.Hdr.Name = "."
+		o.Hdr.Rrtype = dns.TypeOPT
+		m.Extra = append(m.Extra, o)
+	}
+
+	es := IsEDNSClientSubnet(o)
+	if es == nil {
+		es = new(dns.EDNS0_SUBNET)
+		es.Code = dns.EDNS0SUBNET
+		es.Address = net.ParseIP(ip)
+		if es.Address.To4() != nil {
+			es.Address = es.Address.Mask(net.CIDRMask(int(lenNetmask), 8*net.IPv4len))
+			es.Family = 1         // 1 for IPv4 source address, 2 for IPv6
+			es.SourceNetmask = lenNetmask // 32 for IPV4, 128 for IPv6
+		} else {
+			es.Address = net.ParseIP(ip).Mask(net.CIDRMask(int(lenNetmask), 8*net.IPv6len))
+			es.Family = 2          // 1 for IPv4 source address, 2 for IPv6
+			es.SourceNetmask = lenNetmask // 32 for IPV4, 128 for IPv6
 		}
 		es.SourceScope = 0
 		o.Option = append(o.Option, es)

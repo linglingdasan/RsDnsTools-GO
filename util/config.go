@@ -23,11 +23,12 @@ type cdn_ips struct {
 
 type Config struct{
 	ServiceAddress	string `json:"ServerAddress"`
+	IsAdaptiveEcs	bool	`json:"isAdaptiveEcs"`
 	IpConfigFile	string	`json:"IpConfigFile"`
 	DomainConfigFile	string	`json:DomainConfigFile`
 	FwdConfigFile	string	`json:FwdConfigFile`
 	EcsMapConfigFile	string	`json:EcsMapConfigFile`
-
+	AdaptiveFwdConfigFile 	string 	`json:"AdaptiveFwdConfigFile"`
 	//acl name ==> acl id
 	AclNameIdMap	map[string]int
 	//acl id ==> acl name
@@ -42,7 +43,7 @@ type Config struct{
 	AclMap		*dns_cidr
 	DnameList	*dnamelist
 	Forwarders  *ForwarderArray
-
+	AdaptiveForwarders  *AdaptiveForwarderArray
 }
 
 type Fwder struct{
@@ -69,9 +70,65 @@ type ForwarderArray struct{
 
 }
 
+type AdapiveFwder struct{
+	Name 	string	`json:Name`
+	Address	string	`json:Address`
+	Timeout	int
+	Ecs 	bool
+	Nemask 	int		`json:"nemask"`
+	Domains	[]string
+	Default bool	`json:Default`
+	SetRespEcsIP bool `json:"SetRespEcsIp"`
+	FwdPool pool.Pool
+}
+type AdaptiveForwarderArray struct{
+	Forwarder	[]*AdapiveFwder `json:Forwarder`
+	DnameTree		*dnametree
+}
+
 func NewConfig(configFile string) *Config{
 	config := parseConfigJson(configFile)
+	if config.IsAdaptiveEcs == true{
+		getAdaptiveConfig(config)
+	}else{
+		getConfig(config)
+	}
+	return config
+}
 
+func getAdaptiveConfig(config *Config) *Config{
+	//domain name部分
+	dnmap := ParseConfigMapStringSlice(config.DomainConfigFile)
+	config.DnameList = NewDnameList()
+	cdnNames := make(map[string][]string)
+	for dgname, dn := range dnmap{
+		cdnNames[dgname] = append(cdnNames[dgname], "1")
+		for _, dname := range dn{
+			if !(dname[len(dname)-1:] == ".") {
+				dname += "."
+				cdnNames[dgname] = append(cdnNames[dgname], dname)
+			}
+			log.Info(dname)
+		}
+		cdnNames[dgname] = cdnNames[dgname][1:]
+	}
+
+	//fwd部分
+	tfa := ParseAdaptiveFwdArray(config.AdaptiveFwdConfigFile)
+	tfa.DnameTree = NewDnameTree()
+	for i:=0; i<len(tfa.Forwarder);i++ {
+		log.Debugf("%+v\n", tfa.Forwarder[i])
+		for _, dnSetName := range tfa.Forwarder[i].Domains {
+			for _, dname := range cdnNames[dnSetName] {
+				tfa.DnameTree.Insert(dname, tfa.Forwarder[i])
+			}
+		}
+	}
+	config.AdaptiveForwarders = tfa
+	return config
+}
+
+func getConfig(config *Config) *Config {
 	//acl部分
 	ips := ParseConfigMapStringSlice(config.IpConfigFile)
 	id :=0
@@ -177,7 +234,27 @@ func parseConfigJson(path string) *Config {
 
 	return j
 }
+//读取dns adaptive forward配置文件，得到原始adaptive fwd列表
+func ParseAdaptiveFwdArray(path string) *AdaptiveForwarderArray{
+	f, err := os.Open(path)
+	if err != nil {
+		log.Fatal("Open config file failed: ", err)
+	}
+	defer f.Close()
 
+	b, err := ioutil.ReadAll(f)
+	if err != nil {
+		log.Fatal("Read config file failed: ", err)
+	}
+
+	afa := new(AdaptiveForwarderArray)
+	err = json.Unmarshal(b, afa)
+	if err != nil{
+		log.Fatal("Json syntex error: ", err)
+	}
+
+	return afa
+}
 
 //读取dns forward配置文件，得到原始fwd列表
 func ParseFwdArray(path string) *ForwarderArray{
