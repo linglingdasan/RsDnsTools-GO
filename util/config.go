@@ -1,9 +1,9 @@
 package util
 
 import (
+	"RsDnsTools/pool"
 	"encoding/json"
 	log "github.com/Sirupsen/logrus"
-	"gopkg.in/fatih/pool.v2"
 	"os"
 	"io/ioutil"
 	"fmt"

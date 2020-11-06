@@ -40,7 +40,8 @@
     {
       "Name": "default dns 45",
       "Address": "192.168.3.36:3653",
-      "Timeout": 2,
+      "Timeout": 5,
+
       "Default": true
     }
   ]

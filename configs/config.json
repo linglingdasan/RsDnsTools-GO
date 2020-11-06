@@ -1,6 +1,6 @@
 {
   "ServerAddress": ":5552",
-  "IsAdaptiveEcs": true,
+  "IsAdaptiveEcs": false,
   "IpConfigFile": "configs/cdn.ips.json",
   "DomainConfigFile": "configs/cdn.names.json",
   "EcsMapConfigFile": "configs/ecs.map.json",
