@@ -48,7 +48,6 @@ func main() {
 	config := util.NewConfig(configPath)
 	fmt.Printf("%v\n", config)
 
-	checkVersion = true
 	if isLogVerbose {
 		log.SetLevel(log.DebugLevel)
 	} else {

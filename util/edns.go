@@ -1,8 +1,8 @@
 package util
 
 import (
-	"github.com/miekg/dns"
 	"net"
+	"github.com/miekg/dns"
 )
 
 type EDNSClientSubnetType struct {

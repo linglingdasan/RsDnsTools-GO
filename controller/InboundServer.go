@@ -1,14 +1,14 @@
 package controller
 
 import (
-	"time"
-	"github.com/miekg/dns"
-	"sync"
-	log "github.com/Sirupsen/logrus"
-	"gopkg.in/fatih/pool.v2"
-	"os"
+	"RsDnsTools/pool"
 	"RsDnsTools/util"
+	log "github.com/Sirupsen/logrus"
+	"github.com/miekg/dns"
 	"net"
+	"os"
+	"sync"
+	"time"
 )
 
 type Server struct {
@@ -21,12 +21,12 @@ type Server struct {
 	defaultAFwd	*util.AdapiveFwder
 }
 
-
 func NewServer(addr string, cc *util.Config)(*Server, error){
 	s := &Server{Addr: addr, ConnTimeout: 5*time.Second, contextConfig:cc}
-
 	return s, nil
 }
+
+
 
 func (s *Server)initServer(){
 	//建立forward proxy连接池
@@ -105,7 +105,7 @@ func (s *Server)Fetch(fwd string, r *dns.Msg)(*dns.Msg){
 
 func (s *Server)FetchResult(c net.Conn, m *dns.Msg) (r *dns.Msg, err error) {
 	t := time.Now()
-	socketTimeout := 200
+	socketTimeout := 2
 	co := &dns.Conn{Conn:c}
 	co.SetDeadline(t.Add(time.Duration(socketTimeout)*time.Second))
 	if err = co.WriteMsg(m); err != nil {
@@ -159,21 +159,21 @@ func (s *Server) serveDNSIndeedAdaptiveEcs(w dns.ResponseWriter, r *dns.Msg, cli
 	var result *dns.Msg
 	switch w.RemoteAddr().Network() {
 	case "udp", "udp4", "udp6": //udp use connect pool
-		conn, err := pafwd.FwdPool.Get()
+		poolConn, netConn, err := pafwd.FwdPool.Get()
 		if err != nil {
 			log.Errorf("Get netconn from %s pool failed, %s", pafwd.Address, err)
 			return
 		} else {
-			result, err = s.FetchResult(conn, r)
+			result, err = s.FetchResult(netConn, r)
 			if err != nil {
-				if brokenConn, ok := conn.(*pool.PoolConn); ok {
+				if brokenConn, ok := poolConn.(*pool.PoolConn); ok {
 					log.Errorf("s.FetchResult, %s", err)
 					brokenConn.MarkUnusable()
 					brokenConn.Close()
 				}
 				return
 			} else {
-				conn.Close()
+				poolConn.Close()
 			}
 		}
 	default:
@@ -189,18 +189,13 @@ func (s *Server) serveDNSIndeed(w dns.ResponseWriter, r *dns.Msg, clientIp, qnam
 	//进行源IP和域名匹配
 	aclid := s.contextConfig.AclMap.Get(clientIp)
 	nameid := s.contextConfig.DnameList.GetId(qname)
-
 	log.Debugf("client ip belongs to %d, query name belongs to %d", aclid, nameid)
-
 	//按照匹配结果获取要进行forward所使用的上游地址
 	pfwd, ok := s.contextConfig.Forwarders.FwdMap[util.HitPoint{aclid, nameid}]
-
 	if !ok{
 		pfwd = s.defaultFwd
 	}
-
 	fwdAddr := pfwd.Address
-
 	log.Debugf("forwarder address is %s", fwdAddr)
 
 	//ecs部分的处理
@@ -218,29 +213,26 @@ func (s *Server) serveDNSIndeed(w dns.ResponseWriter, r *dns.Msg, clientIp, qnam
 
 	switch w.RemoteAddr().Network() {
 	case "udp", "udp4", "udp6": //udp use connect pool
-
-		conn, err := pfwd.FwdPool.Get()
-
+		poolConn, netConn, err := pfwd.FwdPool.Get()
 		if err != nil {
 			log.Errorf("Get netconn from %s pool failed, %s", pfwd.Address, err)
 			return
 		} else {
-			result, err = s.FetchResult(conn, r)
+			result, err = s.FetchResult(netConn, r)
 			if err != nil {
-				if brokenConn, ok := conn.(*pool.PoolConn); ok {
+				if brokenConn, ok := poolConn.(*pool.PoolConn); ok {
 					brokenConn.MarkUnusable()
 					brokenConn.Close()
 				}
 				return
 			} else {
-				conn.Close()
+				poolConn.Close()
 			}
 		}
 	default:
 		c := new(dns.Client)
 		c.Net = w.RemoteAddr().Network()
 		result,_,_ = c.Exchange(r, fwdAddr)
-
 	}
 
 	w.WriteMsg(result)
